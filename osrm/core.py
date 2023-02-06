@@ -134,7 +134,7 @@ def simple_route(coord_origin, coord_dest, coord_intermediate=None,
                  alternatives=False, steps=False, output="full",
                  geometry='polyline', overview="simplified",
                  annotations='true', continue_straight='default',
-                 url_config=RequestConfig, send_as_polyline=True):
+                 bearings=None, url_config=RequestConfig, send_as_polyline=True):
     """
     Function wrapping OSRM 'viaroute' function and returning the JSON reponse
     with the route_geometry decoded (in WKT or WKB) if needed.
@@ -161,6 +161,9 @@ def simple_route(coord_origin, coord_dest, coord_intermediate=None,
     overview : str, optional
         Query for the geometry overview, either "simplified", "full" or "false"
         (Default: "simplified")
+    bearings : list of float, optional
+        Give the orientation from north for each coordinates
+        (Default: None)
     url_config : osrm.RequestConfig, optional
         Parameters regarding the host, version and profile to use
 
@@ -209,7 +212,11 @@ def simple_route(coord_origin, coord_dest, coord_intermediate=None,
                  str(alternatives).lower(), geom_request, annotations,
                  continue_straight)
             ]
+    if bearings is not None:
+        url.append("&bearings={}".format(";".join([str(int(b)) for b in bearings])))
+
     req = Request("".join(url))
+    print("".join(url))
     if url_config.auth:
         req.add_header("Authorization", url_config.auth)
     rep = urlopen(req)
